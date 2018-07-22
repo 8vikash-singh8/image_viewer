@@ -25,12 +25,14 @@ public class MainActivity extends FlutterActivity implements SensorEventListener
   Sensor mProximity;
   ArrayList<String> imagePath ;
   int index;
+  int start_flag;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     GeneratedPluginRegistrant.registerWith(this);
 
+    start_flag = 0 ;
     flutterChannel = new MethodChannel(getFlutterView(), "FLUTTER_CHANNEL");
     androidChannel = new MethodChannel(getFlutterView(),"ANDROID_CHANNEL");
 
@@ -63,6 +65,8 @@ public class MainActivity extends FlutterActivity implements SensorEventListener
             index = 0 ;
 
             flutterChannel.invokeMethod("nextImage",imagePath.get(index));
+            
+            start_flag = 1;
           }
         }
       });
@@ -75,7 +79,7 @@ public class MainActivity extends FlutterActivity implements SensorEventListener
   @Override
   public final void onSensorChanged(SensorEvent event) {
     float distance =  event.values[0];
-    if(distance < mProximity.getMaximumRange()){
+    if(distance < mProximity.getMaximumRange() && start_flag==1){
       index = (index + 1) % imagePath.size();
       flutterChannel.invokeMethod("nextImage",imagePath.get(index));
     }
